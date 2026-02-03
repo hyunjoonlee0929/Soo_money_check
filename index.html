@@ -36,36 +36,87 @@
         <div class="card">
           <h2 class="card__title">거래 입력</h2>
           <form id="entryForm" class="form">
-            <div class="grid">
+            <div class="grid grid--entry">
               <label class="field">
-                <span class="field__label">날짜</span>
-                <input class="input" name="date" type="date" required />
+                <span class="field__label">날짜 (YYYYMMDD 또는 YYYY-MM-DD)</span>
+                <input class="input" name="date" type="text" placeholder="20260202 또는 2026-02-02" />
               </label>
               <label class="field">
                 <span class="field__label">거래처</span>
-                <input class="input" name="client" type="text" placeholder="예: ○○업체" required />
+                <input class="input" name="client" type="text" placeholder="예: ○○업체" />
               </label>
               <label class="field">
                 <span class="field__label">행사명</span>
-                <input class="input" name="eventName" type="text" placeholder="예: 2월 정기행사" required />
+                <input class="input" name="eventName" type="text" placeholder="예: 2월 정기행사" />
               </label>
               <label class="field">
                 <span class="field__label">행사내역</span>
                 <input class="input" name="eventDetail" type="text" placeholder="예: 대관/식음/인력" />
               </label>
-              <label class="field">
-                <span class="field__label">입금</span>
-                <input class="input" name="income" type="number" min="0" step="1" value="0" required />
-              </label>
-              <label class="field">
-                <span class="field__label">지출</span>
-                <input class="input" name="expense" type="number" min="0" step="1" value="0" required />
-              </label>
-              <label class="field field--full">
-                <span class="field__label">비고</span>
-                <input class="input" name="memo" type="text" placeholder="예: 세금계산서 발행, 현금영수증 등" />
-              </label>
             </div>
+
+            <div class="currency-grid">
+              <div class="currency-section">
+                <h3 class="currency-title">원화 (KRW)</h3>
+                <div class="currency-inputs">
+                  <label class="field">
+                    <span class="field__label">입금</span>
+                    <input class="input" name="krwIncome" type="number" min="0" step="any" value="0" />
+                  </label>
+                  <label class="field">
+                    <span class="field__label">지출</span>
+                    <input class="input" name="krwExpense" type="number" min="0" step="any" value="0" />
+                  </label>
+                </div>
+              </div>
+
+              <div class="currency-section">
+                <h3 class="currency-title">방콕뱅크 (BB)</h3>
+                <div class="currency-inputs">
+                  <label class="field">
+                    <span class="field__label">입금</span>
+                    <input class="input" name="bbIncome" type="number" min="0" step="any" value="0" />
+                  </label>
+                  <label class="field">
+                    <span class="field__label">지출</span>
+                    <input class="input" name="bbExpense" type="number" min="0" step="any" value="0" />
+                  </label>
+                </div>
+              </div>
+
+              <div class="currency-section">
+                <h3 class="currency-title">카시컨 (KB)</h3>
+                <div class="currency-inputs">
+                  <label class="field">
+                    <span class="field__label">입금</span>
+                    <input class="input" name="kbIncome" type="number" min="0" step="any" value="0" />
+                  </label>
+                  <label class="field">
+                    <span class="field__label">지출</span>
+                    <input class="input" name="kbExpense" type="number" min="0" step="any" value="0" />
+                  </label>
+                </div>
+              </div>
+
+              <div class="currency-section">
+                <h3 class="currency-title">달러 (USD)</h3>
+                <div class="currency-inputs">
+                  <label class="field">
+                    <span class="field__label">입금</span>
+                    <input class="input" name="usdIncome" type="number" min="0" step="any" value="0" />
+                  </label>
+                  <label class="field">
+                    <span class="field__label">지출</span>
+                    <input class="input" name="usdExpense" type="number" min="0" step="any" value="0" />
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <label class="field field--full">
+              <span class="field__label">비고</span>
+              <input class="input" name="memo" type="text" placeholder="예: 세금계산서 발행, 현금영수증 등" />
+            </label>
 
             <div class="form__actions">
               <button class="btn btn--primary" type="submit">저장</button>
@@ -80,23 +131,42 @@
 
         <div class="card">
           <div class="card__head">
-            <h2 class="card__title">저장된 내역</h2>
+            <h2 class="card__title">저장된 내역 (월별)</h2>
             <div class="card__subactions">
               <span class="badge" id="entryCount">0건</span>
+              <button class="btn btn--ghost" id="btnExportEntryCsv" type="button">전체 CSV 저장</button>
             </div>
           </div>
+          
+          <div class="monthly-export-row" id="monthlyExportButtons"></div>
+          
           <div class="tableWrap">
-            <table class="table" id="entryTable">
+            <table class="table table--wide" id="entryTable">
               <thead>
                 <tr>
-                  <th>날짜</th>
-                  <th>거래처</th>
-                  <th>행사명</th>
-                  <th>행사내역</th>
+                  <th rowspan="2">월일</th>
+                  <th rowspan="2">거래처</th>
+                  <th rowspan="2">행사명</th>
+                  <th rowspan="2">내용</th>
+                  <th colspan="3" class="currency-header">원화</th>
+                  <th colspan="3" class="currency-header">방콕뱅크</th>
+                  <th colspan="3" class="currency-header">카시컨</th>
+                  <th colspan="3" class="currency-header">달러</th>
+                  <th rowspan="2" class="actions">작업</th>
+                </tr>
+                <tr>
                   <th class="num">입금</th>
-                  <th class="num">지출</th>
-                  <th>비고</th>
-                  <th class="actions">작업</th>
+                  <th class="num">출금</th>
+                  <th class="num">잔액</th>
+                  <th class="num">입금</th>
+                  <th class="num">출금</th>
+                  <th class="num">잔액</th>
+                  <th class="num">입금</th>
+                  <th class="num">출금</th>
+                  <th class="num">잔액</th>
+                  <th class="num">입금</th>
+                  <th class="num">출금</th>
+                  <th class="num">잔액</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -121,7 +191,7 @@
                 <span class="badge" id="eventCount">0건</span>
               </div>
               <div class="list" id="eventList" role="list"></div>
-              <p class="hint">입력 탭에서 저장한 내역의 “행사명”이 정산서 단위가 됩니다.</p>
+              <p class="hint">입력 탭에서 저장한 내역의 "행사명"이 정산서 단위가 됩니다.</p>
             </aside>
 
             <div class="split__main">
@@ -133,43 +203,76 @@
                   </div>
                 </div>
 
+                <h4 class="section-subtitle">입금</h4>
                 <div class="grid grid--reportMeta">
                   <label class="field">
-                    <span class="field__label">확정가</span>
-                    <input class="input" id="reportFixedPrice" type="number" min="0" step="1" value="0" />
+                    <span class="field__label">원화 확정가 (입금)</span>
+                    <input class="input" id="reportFixedPriceKRWIncome" type="number" step="any" value="0" />
                   </label>
                   <label class="field">
-                    <span class="field__label">바트환산(원)</span>
-                    <input class="input" id="reportBahtKrw" type="number" min="0" step="1" value="0" />
+                    <span class="field__label">바트환산 (입금) - 1원당 바트</span>
+                    <input class="input" id="reportBahtExchangeRateIncome" type="number" step="any" value="0" />
                   </label>
                   <label class="field">
-                    <span class="field__label">팁</span>
-                    <input class="input" id="reportTip" type="number" min="0" step="1" value="0" />
+                    <span class="field__label">바트 확정가 (입금)</span>
+                    <input class="input" id="reportFixedPriceBahtIncome" type="number" step="any" value="0" />
                   </label>
-                  <label class="field">
-                    <span class="field__label">옵션수익</span>
-                    <input class="input" id="reportOptionProfit" type="number" min="0" step="1" value="0" />
-                  </label>
-                  <label class="field">
-                    <span class="field__label">쇼핑수익</span>
-                    <input class="input" id="reportShoppingProfit" type="number" min="0" step="1" value="0" />
-                  </label>
-                  <label class="field">
-                    <span class="field__label">기타 지출</span>
-                    <input class="input" id="reportOtherExpense" type="number" min="0" step="1" value="0" />
+                  <label class="field field--readonly">
+                    <span class="field__label">바트 입금가 (BB+KB)</span>
+                    <div class="readonly-value" id="reportBahtIncomeTotal">0</div>
                   </label>
                 </div>
-                <p class="hint">위 항목들은 “행사명 단위”로 저장됩니다.</p>
+
+                <h4 class="section-subtitle">지출</h4>
+                <div class="grid grid--reportMeta">
+                  <label class="field">
+                    <span class="field__label">원화 확정가 (지출)</span>
+                    <input class="input" id="reportFixedPriceKRWExpense" type="number" step="any" value="0" />
+                  </label>
+                  <label class="field">
+                    <span class="field__label">바트환산 (지출) - 1원당 바트</span>
+                    <input class="input" id="reportBahtExchangeRateExpense" type="number" step="any" value="0" />
+                  </label>
+                  <label class="field">
+                    <span class="field__label">바트 확정가 (지출)</span>
+                    <input class="input" id="reportFixedPriceBahtExpense" type="number" step="any" value="0" />
+                  </label>
+                  <label class="field field--readonly">
+                    <span class="field__label">바트 지출가 (BB+KB)</span>
+                    <div class="readonly-value" id="reportBahtExpenseTotal">0</div>
+                  </label>
+                </div>
+
+                <div class="card__head card__head--tight">
+                  <h4 class="card__title">추가 항목 (팁, 옵션수익, 기타 등)</h4>
+                  <button class="btn btn--primary btn--sm" id="btnAddAdditionalItem" type="button">항목 추가</button>
+                </div>
+
+                <div class="tableWrap">
+                  <table class="table" id="additionalItemsTable">
+                    <thead>
+                      <tr>
+                        <th>항목명</th>
+                        <th class="num">입금</th>
+                        <th class="num">지출</th>
+                        <th class="actions">작업</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+
+                <p class="hint">위 항목들은 "행사명 단위"로 저장됩니다.</p>
               </div>
 
               <div class="card card--inner">
                 <div class="summary">
                   <div class="summary__item">
-                    <div class="summary__label">총 입금 (입금+팁+옵션수익+쇼핑수익)</div>
+                    <div class="summary__label">총 입금 (바트확정가+BB+KB+추가항목)</div>
                     <div class="summary__value" id="sumIncome">0</div>
                   </div>
                   <div class="summary__item">
-                    <div class="summary__label">총 지출액 (지출+기타 지출)</div>
+                    <div class="summary__label">총 지출액 (바트확정가+BB+KB+추가항목)</div>
                     <div class="summary__value" id="sumExpense">0</div>
                   </div>
                   <div class="summary__item summary__item--strong">
@@ -194,6 +297,82 @@
                   </table>
                 </div>
               </div>
+
+              <!-- 가이드 정산 섹션 -->
+              <div class="card card--inner">
+                <h3 class="card__title">가이드 정산</h3>
+                
+                <div class="grid grid--guide">
+                  <label class="field">
+                    <span class="field__label">투어피</span>
+                    <input class="input" id="reportTourFee" type="number" min="0" step="any" value="0" />
+                  </label>
+                  <label class="field">
+                    <span class="field__label">옵션판매</span>
+                    <input class="input" id="reportOptionSales" type="number" min="0" step="any" value="0" />
+                  </label>
+                  <label class="field">
+                    <span class="field__label">기타입금</span>
+                    <input class="input" id="reportOtherIncome" type="number" min="0" step="any" value="0" />
+                  </label>
+                  <label class="field">
+                    <span class="field__label">행사비</span>
+                    <input class="input" id="reportEventCost" type="number" min="0" step="any" value="0" />
+                  </label>
+                  <label class="field">
+                    <span class="field__label">옵션원가</span>
+                    <input class="input" id="reportOptionCost" type="number" min="0" step="any" value="0" />
+                  </label>
+                  <label class="field">
+                    <span class="field__label">가이드일비</span>
+                    <input class="input" id="reportGuideDailyFee" type="number" min="0" step="any" value="0" />
+                  </label>
+                  <label class="field">
+                    <span class="field__label">가이드 컴</span>
+                    <input class="input" id="reportGuideCommission" type="number" min="0" step="any" value="0" />
+                  </label>
+                  <label class="field">
+                    <span class="field__label">기타지급</span>
+                    <input class="input" id="reportOtherPayment" type="number" min="0" step="any" value="0" />
+                  </label>
+                </div>
+
+                <div class="card__head card__head--tight">
+                  <h4 class="card__title">옵션 상세</h4>
+                  <button class="btn btn--primary btn--sm" id="btnAddGuideOption" type="button">옵션 추가</button>
+                </div>
+
+                <div class="tableWrap">
+                  <table class="table" id="guideOptionsTable">
+                    <thead>
+                      <tr>
+                        <th>옵션</th>
+                        <th class="num">판매가</th>
+                        <th class="num">원가</th>
+                        <th class="num">수익</th>
+                        <th>업체 및 품목</th>
+                        <th class="actions">작업</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+
+                <div class="summary summary--guide">
+                  <div class="summary__item">
+                    <div class="summary__label">가이드 총입금</div>
+                    <div class="summary__value" id="guideSummaryIncome">0</div>
+                  </div>
+                  <div class="summary__item">
+                    <div class="summary__label">가이드 총지출</div>
+                    <div class="summary__value" id="guideSummaryExpense">0</div>
+                  </div>
+                  <div class="summary__item summary__item--strong">
+                    <div class="summary__label">가이드 정산</div>
+                    <div class="summary__value" id="guideSummaryProfit">0</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -208,7 +387,7 @@
             </div>
           </div>
           <p class="hint">
-            수입은 “정산서의 행사명과 총 수익”을 가져오며, 필요하면 이 탭에서 금액을 직접 수정할 수 있습니다. 지출은 이 탭에서 직접 입력합니다.
+            수입은 "정산서의 행사명과 총 수익"을 가져오며, 필요하면 이 탭에서 금액을 직접 수정할 수 있습니다. 지출은 이 탭에서 직접 입력합니다.
           </p>
         </div>
 
