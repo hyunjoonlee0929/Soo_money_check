@@ -614,13 +614,22 @@ function renderReportDetail() {
   $("reportCount").textContent = `${sorted.length}건`;
 
   for (const e of sorted) {
+    // 각 항목의 입금 = 바트확정가(입금) + BB입금 + KB입금
+    const itemIncome = bahtIncomeDefault + (e.bbIncome || 0) + (e.kbIncome || 0);
+    // 각 항목의 지출 = 바트확정가(지출) + BB지출 + KB지출
+    const itemExpense = bahtExpenseDefault + (e.bbExpense || 0) + (e.kbExpense || 0);
+    
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${e.date}</td>
       <td>${escapeHtml(e.client)}</td>
       <td>${escapeHtml(e.eventDetail || "")}</td>
-      <td class="num">${formatNumberKRW(e.krwIncome || 0)}</td>
-      <td class="num">${formatNumberKRW(e.krwExpense || 0)}</td>
+      <td class="num">
+        <input class="input input--sm num" type="number" step="any" value="${itemIncome}" data-action="entry-income" data-id="${e.id}" />
+      </td>
+      <td class="num">
+        <input class="input input--sm num" type="number" step="any" value="${itemExpense}" data-action="entry-expense" data-id="${e.id}" />
+      </td>
       <td>${escapeHtml(e.memo || "")}</td>
     `;
     tbody.appendChild(tr);
@@ -1204,29 +1213,87 @@ function init() {
     const summary = computeEventSummary(selectedEventKey);
 
     const header = [
-      "행사명", "확정가", "바트환산(원)", "팁", "옵션수익", "쇼핑수익", "기타 지출",
-      "총 입금", "총 지출액", "총 수익", "",
-      "날짜", "거래처", "행사내역", "입금", "지출", "비고",
+      "행사명",
+      "원화 확정가(입금)",
+      "바트환산(입금)",
+      "바트 확정가(입금)",
+      "원화 확정가(지출)",
+      "바트환산(지출)",
+      "바트 확정가(지출)",
+      "총 입금",
+      "총 지출액",
+      "총 수익",
+      "",
+      "날짜",
+      "거래처",
+      "행사내역",
+      "입금",
+      "지출",
+      "비고",
     ];
     
     const metaRow = [
       name,
-      String(toFloat(r.fixedPrice)),
-      String(toFloat(r.bahtKrw)),
-      String(toFloat(r.tip)),
-      String(toFloat(r.optionProfit)),
-      String(toFloat(r.shoppingProfit)),
-      String(toFloat(r.otherExpense)),
+      String(toFloat(r.fixedPriceKRWIncome)),
+      String(toFloat(r.bahtExchangeRateIncome)),
+      String(toFloat(r.fixedPriceBahtIncome)),
+      String(toFloat(r.fixedPriceKRWExpense)),
+      String(toFloat(r.bahtExchangeRateExpense)),
+      String(toFloat(r.fixedPriceBahtExpense)),
       String(summary.totalIncome),
       String(summary.totalExpense),
       String(summary.totalProfit),
-      "", "", "", "", "", "", "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
     ];
 
-    const rows = list
+    const rows = [];
+    
+    // 거래 내역
+    const sorted = list
       .slice()
-      .sort((a, b) => (a.date > b.date ? 1 : a.date < b.date ? -1 : 0))
-      .map((e) => ["", "", "", "", "", "", "", "", "", "", "", e.date, e.client, e.eventDetail, e.krwIncome, e.krwExpense, e.memo]);
+      .sort((a, b) => (a.date > b.date ? 1 : a.date < b.date ? -1 : 0));
+    
+    const bahtIncomeFixed = toFloat(r.fixedPriceBahtIncome);
+    const bahtExpenseFixed = toFloat(r.fixedPriceBahtExpense);
+    
+    for (const e of sorted) {
+      const itemIncome = bahtIncomeFixed + (e.bbIncome || 0) + (e.kbIncome || 0);
+      const itemExpense = bahtExpenseFixed + (e.bbExpense || 0) + (e.kbExpense || 0);
+      
+      rows.push([
+        "", "", "", "", "", "", "", "", "", "", "",
+        e.date,
+        e.client,
+        e.eventDetail,
+        String(itemIncome),
+        String(itemExpense),
+        e.memo
+      ]);
+    }
+    
+    // 추가 항목
+    if (r.additionalItems && r.additionalItems.length > 0) {
+      rows.push(["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+      rows.push(["", "", "", "", "", "", "", "", "", "", "", "추가 항목", "", "", "", "", ""]);
+      
+      for (const item of r.additionalItems) {
+        rows.push([
+          "", "", "", "", "", "", "", "", "", "", "",
+          "",
+          item.name || "",
+          "",
+          String(toFloat(item.income)),
+          String(toFloat(item.expense)),
+          ""
+        ]);
+      }
+    }
 
     const escapeCell = (v) => {
       const s = String(v ?? "");
